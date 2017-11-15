@@ -48,10 +48,10 @@ sudo mount -t cifs //<name_here>.file.core.windows.net/<subfolder_here> [mount p
 
 
 ## Reference 
-[Lablup per-user-storage concept repo](https://github.com/lu-project/per-user-storage)
-[Azure subscription and service limits, quotas, and constraints](https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits#storage-limits)
-[Constructing an Account SAS](https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-an-account-sas)
-[Use Azure Files with Linux](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-use-files-linux)
+- [Lablup per-user-storage concept repo](https://github.com/lu-project/per-user-storage)
+- [Azure subscription and service limits, quotas, and constraints](https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits#storage-limits)
+- [Constructing an Account SAS](https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-an-account-sas)
+- [Use Azure Files with Linux](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-use-files-linux)
 
 
 
