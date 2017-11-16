@@ -1,0 +1,16 @@
+volumes:
+
+  - name: azure-shard-1
+    mount:
+      # requires samba, cifs-utils package
+      at: requested
+      fstype: cifs
+      path: "//USERNAME.file.core.windows.net/vfolder"
+      options: "vers=3.0,username=USERNAME,password=XXXXX,dir_mode=0777,file_mode=0777,sec=ntlmssp"
+
+  - name: azure-deeplearning-samples
+    mount:
+      at: startup
+      fstype: cifs
+      path: "//USERNAME.file.core.windows.net/dlsamples"
+      options: "vers=3.0,username=USERNAME,password=XXXXX,dir_mode=0777,file_mode=0777,sec=ntlmssp"
