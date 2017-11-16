@@ -102,14 +102,13 @@ The Backend.AI agent uses this configuration as follows:
   - Mount the remote volumes indicated by the manager as the creation config into the host filesystem. They have `at: requested` property in the etcd config.
   - Mount the "startup" volumes and the "requested" volumes into the container's `/home/work` directory.
   - The user codes can now seamlessly access the files in the volumes like a plain sub-directory inside the home directory.
+  - When the user shuts down the kernel or the kernel itself terminates, unmount the volume. (But keep it mounted if other kernels are still using it)
 
 ## Reference 
 - [Lablup per-user-storage concept repo](https://github.com/lu-project/per-user-storage)
 - [Azure subscription and service limits, quotas, and constraints](https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits#storage-limits)
 - [Constructing an Account SAS](https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-an-account-sas)
 - [Use Azure Files with Linux](https://docs.microsoft.com/en-us/azure/storage/files/storage-how-to-use-files-linux)
-
-
-
+- https://github.com/lablup/backend.ai-manager/issues/28
 
 
