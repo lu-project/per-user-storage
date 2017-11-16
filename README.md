@@ -79,9 +79,20 @@ volumes:
     mount:
       at: startup
       fstype: cifs
-      path: "//USERNAME.file.core.windows.net/vfolder"
+      path: "//USERNAME.file.core.windows.net/dlsamples"
       options: "vers=3.0,username=USERNAME,password=PASSWORD,dir_mode=0777,file_mode=0777,sec=ntlmssp"
 ```
+
+The Backend.AI manager manages the per-use "virtual folder" as follows:
+
+* The manager instance always mounts all remote volumes specified in the etcd config.
+* On vfolder creation request by the user:
+  - Create a sub-directory using a random UUID under one of the "requested" volume.
+  - Add a database record for its user-specific alias, the host volume and the UUID path of the directory.
+* It provides storage statistics (e.g., how many files are there, how much size it is using) to the users via the Backend.AI API.
+* On the kernel creation request by the user:
+  - Parse the creation config of the request and extract which per-user volume is to be mounted in the container.
+  - Attach the "vfolder" record information to the agent-routed request.
 
 The Backend.AI agent uses this configuration as follows:
 
