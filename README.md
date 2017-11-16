@@ -1,51 +1,96 @@
 # Lablup per-user-storage concept code
-This Python concept code for per-user-storage concept code for Lablup
+This Python concept code for per-user-storage concept code for Lablup.
 
-## per-user-storage for backend.ai users
+## Per-user-storage for Backend.AI users
 Azure Storage Account Blob is best option for SaaS business - handling unlimited storage account with secure SAS token and SMB protocol, fully managed.
 
 ### Create storage container
+```sh
+pip install azure-storage-blob 
 ```
-# pip install azure-storage-blob 
+
+```python
 block_blob_service.create_container('lablup-container')
 ```
 
 ### Upload blob on container 
-```
+```python
 block_blob_service.create_blob_from_path(
     'lablup-container',  # continaer name
-    'myblockblob3',  # save as name on blob storage
-    'azure_center.png',   # local image file
+    'myblockblob3',      # save as name on blob storage
+    'azure_center.png',  # local image file
     content_settings=ContentSettings(content_type='image/png')
-            )
+)
 ```
 
 ### List blob on container
-```
+```python
 generator = block_blob_service.list_blobs('lablup-container')
 for blob in generator:
     print(blob.name)
 ```
 
 ### Generate SAS token for secure access on per-user-storage
-```
+```python
 def GetSasToken():
     blobService = BlockBlobService(account_name=accountName, account_key=accountKey)
-    sas_token = blobService.generate_container_shared_access_signature(containerName,ContainerPermissions.READ, datetime.utcnow() + timedelta(hours=1))
+    sas_token = blobService.generate_container_shared_access_signature(
+        containerName,
+        ContainerPermissions.READ,
+        datetime.utcnow() + timedelta(hours=1)
+    )
     print(sas_token)
     return sas_token
 
 def AccessTest(token):
     print(token)
-    blobService = BlockBlobService(account_name = accountName, account_key = None, sas_token = token)
-    blobService.get_blob_to_path(containerName,blobName,"c://temp//result.png")
+    blobService = BlockBlobService(account_name=accountName, account_key=None, sas_token=token)
+    blobService.get_blob_to_path(containerName, blobName, "result.png")
 ```
 
 ### Mount on Linux machine with Azure Files
-```
-sudo mount -t cifs //<name_here>.file.core.windows.net/<subfolder_here> [mount point] -o vers=3.0,username=lablupperuser,password=<password>,dir_mode=0777,file_mode=0777,sec=ntlmssp
+```sh
+sudo apt install cifs-utils
+sudo mkdir -p /mnt/azvolume
+sudo mount -t cifs //$USERNAME.file.core.windows.net/<subfolder_here> /mnt/azvolume -o vers=3.0,username=$USERNAME,password=$PASSWORD,dir_mode=0777,file_mode=0777,sec=ntlmssp
 ```
 
+### Integration with Backend.AI
+
+There are two types of integration:
+
+* Shared/private datasets on Azure Blob Storage
+* Per-user cloud directory on Azure Files
+
+Backend.AI manager and agents use an etcd cluster to store and load its global configuration.
+Here we have built a prototype scheme for "remote volumes" in etcd configuration:
+
+```yaml
+volumes:
+
+  - name: azure-shard-1
+    mount:
+      at: requested
+      fstype: cifs
+      path: "//USERNAME.file.core.windows.net/vfolder"
+      options: "vers=3.0,username=USERNAME,password=PASSWORD,dir_mode=0777,file_mode=0777,sec=ntlmssp"
+
+  - name: azure-deeplearning-samples
+    mount:
+      at: startup
+      fstype: cifs
+      path: "//USERNAME.file.core.windows.net/vfolder"
+      options: "vers=3.0,username=USERNAME,password=PASSWORD,dir_mode=0777,file_mode=0777,sec=ntlmssp"
+```
+
+The Backend.AI agent uses this configuration as follows:
+
+* On startup of each agent, it reads the config from etcd and do:
+  - Mount the remote volumes which has `at: startup` property into the host filesystem
+* On the kernel creation request routed from the manager:
+  - Mount the remote volumes indicated by the manager as the creation config into the host filesystem. They have `at: requested` property in the etcd config.
+  - Mount the "startup" volumes and the "requested" volumes into the container's `/home/work` directory.
+  - The user codes can now seamlessly access the files in the volumes like a plain sub-directory inside the home directory.
 
 ## Reference 
 - [Lablup per-user-storage concept repo](https://github.com/lu-project/per-user-storage)
